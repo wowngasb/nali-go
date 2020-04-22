@@ -1,9 +1,8 @@
-module main
+module nali
 
-go 1.13
+go 1.14
 
 require (
-	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
-	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20200117220505-0cba7a3a9ee9 // indirect
+	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
+	github.com/ipipdotnet/ipdb-go v1.3.0
 )
