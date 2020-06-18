@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/axgle/mahonia"
-	"github.com/ipipdotnet/ipdb-go"
+	ipdb "github.com/ipipdotnet/ipdb-go"
 	"io"
 	"log"
 	"os"
@@ -35,7 +35,7 @@ type AppCfg struct {
 
 func main() {
 	cfg := &AppCfg{}
-	cfg.color = true
+	cfg.color = false
 
 	if args := os.Args; len(args) > 1 {
 		cmd(args[1], cfg)
@@ -96,7 +96,7 @@ func Analyse(item string, cfg *AppCfg) string {
 
 func findIpV4(ip string) string {
 	addr := ""
-	db, err := ipdb.NewCity("ipipfree_ipdb.dat")
+	db, err := loadDb()
 	if err != nil {
 		return addr
 	}
@@ -107,6 +107,21 @@ func findIpV4(ip string) string {
 	}
 
 	return addr + strings.Join(arr, " ")
+}
+
+func loadDb() (*ipdb.City, error) {
+	ipdbFile := "D:\\test\\ipipfree_ipdb.dat"
+	if _, err := os.Stat(ipdbFile); err == nil || os.IsExist(err) {
+		return ipdb.NewCity(ipdbFile)
+	}
+
+	ipdbFile = "C:\\ipipfree_ipdb.dat"
+	if _, err := os.Stat(ipdbFile); err == nil || os.IsExist(err) {
+		return ipdb.NewCity(ipdbFile)
+	}
+
+	ipdbFile = "ipipfree_ipdb.dat"
+	return ipdb.NewCity(ipdbFile)
 }
 
 func ConvertToString(src string, srcCode string, tagCode string) string {
@@ -141,22 +156,16 @@ func cmd(opt string, cfg *AppCfg) {
 
 func _version() {
 	fmt.Println(version)
-	if _, err := os.Stat("ipipfree_ipdb.dat"); err == nil || os.IsExist(err) {
-		db, err := ipdb.NewCity("ipipfree_ipdb.dat")
-		if err != nil {
-			log.Fatal(err)
-		}
 
-		err = db.Reload("ipipfree_ipdb.dat")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if db.IsIPv4() {
-			fmt.Printf("ipdb BuildTime: %s\n", db.BuildTime())
-			fmt.Printf("ipdb Fields: %v\n", db.Fields())
-		}
-	} else {
+	db, err := loadDb()
+	if err != nil {
 		fmt.Printf("IPv4 Version： Database Not Found.\n")
+		log.Fatal(err)
+		return
+	}
+
+	if db.IsIPv4() {
+		fmt.Printf("ipdb BuildTime: %s\n", db.BuildTime())
+		fmt.Printf("ipdb Fields: %v\n", db.Fields())
 	}
 }
